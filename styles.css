@@ -1,0 +1,91 @@
+body {
+  position: relative;
+  font-family: sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  background-color: #eae2d5; /* ваш новый фон */
+}
+
+h1 {
+  background-color: #333;
+  color: #fff;
+  padding: 0.2rem 1rem;
+  margin: 0;
+}
+
+
+
+.buttons {
+  margin-top: 1rem;
+}
+
+button {
+  margin: 0 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+#notesCanvas {
+  display: block;
+  background: black;
+  width: 90vw;         /* адаптивная ширина ~90% экрана */
+  max-width: 400px;    /* не больше 400px */
+  height: 90vh;        
+  max-height: 700px;
+  margin: 20px auto;   /* отступ сверху 20px, выравнивание по центру */
+}
+
+
+
+#songAndPreview {
+  display: flex;              /* Размещаем дочерние блоки (список и preview) в строку */
+  flex-direction: row;        /* горизонтально */
+  align-items: flex-start; 
+  justify-content: center;  /* распределять пространство */
+  width: 90vw;                /* 90% от ширины экрана */
+  max-width: 400px; 
+  margin: 0 auto;             /* центрируем сам контейнер по горизонтали */
+  gap: min(1vw, 10px);                   
+}
+
+
+
+#songListContainer {
+  flex: 1;
+  max-width: 400px; 
+  border: 1px solid #ccc;    /* граница для наглядности */
+  display: inline-block;
+  text-align: left;          /* если хотите текст внутри слева */ 
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+#previewBlock {
+  display: flex;
+  flex-direction: column; /* Располагаем элементы (Preview и #startGuitarDiv) вертикально */
+  align-items: flex-start; /* Выравниваем по левому краю (или center, если нужно) */
+  gap: min(1vh, 10px);                /* Между кнопкой и чекбокс-блоком сделаем 1vh отступ */
+
+
+  margin-top: min(2vh, 20px);         /* Поднятый отступ сверху (как у вас было) */
+}
+
+#startGuitarDiv {
+  margin-top: min(1vh, 10px);      /* Можно подкорректировать отступ ещё */
+  margin-left: 1.5rem;
+}
+
+#musicInBrowserDiv {
+  
+  margin-left: 0.25rem;        /* сдвинуть вправо, как у startGuitarDiv */
+}
+
+
+
+#tempoContainer {
+  margin-left: 0.25rem;
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>Saolla</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h1>Saolla</h1>
+
+
+
+<div id="songAndPreview">
+  <!-- Блок выбора песен -->
+  <div id="songListContainer">
+    <!-- ... наполняется скриптом, как и прежде ... -->
+  </div>
+
+  <div id="previewBlock">
+    <!-- (1) Кнопка Preview -->
+    <button id="btnPreview">Preview</button>
+  
+    <!-- (2) Новый блок с текстом "Start guitar" и чекбоксом -->
+    <div id="startGuitarDiv">
+      <label for="startGuitarCheckbox">Start guitar</label><br>
+      <input type="checkbox" id="startGuitarCheckbox" checked />
+    </div>
+
+    <div id="musicInBrowserDiv">
+      <label for="musicInBrowserCheckbox">Music in browser</label><br/>
+      <input type="checkbox" id="musicInBrowserCheckbox" checked/>
+    </div>
+    
+    <div id="tempoContainer">
+      <label for="tempoSelect">Tempo:</label>
+      <select id="tempoSelect">
+        <option value="1.0">100%</option>
+        <option value="0.75">75%</option>
+        <option value="0.5">50%</option>
+      </select>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+  <!-- Кнопки -->
+  <div class="buttons">
+    <button id="btnPlay">Play</button>
+    <button id="btnPause">Stop</button>
+  </div>
+
+  <!-- Новое: Canvas для нот -->
+  <canvas id="notesCanvas"></canvas>
+
+  <!-- Аудиоэлемент. Если хотите видеть встроенный плеер, уберите style="display:none" -->
+  <audio id="audioPlayer" style="display:none;" controls></audio>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
