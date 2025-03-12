@@ -84,7 +84,7 @@ function setPreviewArrow(index, isOn) {
 
   // Базовый URL: http://localhost:3000
   // (Если потом на ESP, замените на http://192.168.4.1)
-  const baseUrl = "http://localhost:3000";
+  const baseUrl = "https://saolla.ru/app"; //https://saolla.ru/app  http://localhost:3000 http://192.168.4.1
 
   // При нажатии Play отправляем команду + меняем audio.src
   btnPlay.addEventListener("click", () => {
@@ -119,10 +119,10 @@ function setPreviewArrow(index, isOn) {
       // Если шла preview, останавливаем
       if (isPreviewPlaying) {
         audioPlayer.pause();
-        isPreviewPlaying = false;
-        setPreviewArrow(lastPreviewSongIndex, false);
-        lastPreviewSongIndex = -1; // сброс
       }
+      setPreviewArrow(lastPreviewSongIndex, false);
+      isPreviewPlaying = false;
+      lastPreviewSongIndex = -1; // сброс
 
     // 2) Установим плееру правильный src. (songs/song1.mp3)
     const mp3File = songs[selectedSongIndex].mp3; 
@@ -178,7 +178,7 @@ function setPreviewArrow(index, isOn) {
         setPreviewArrow(lastPreviewSongIndex, false);
       }
 
-      setPreviewArrow(selectedSongIndex, true);
+      
 
       const mp3File = songs[selectedSongIndex].mp3;
       audioPlayer.src = `${baseUrl}/songs/${mp3File}`;
@@ -196,6 +196,7 @@ function setPreviewArrow(index, isOn) {
           console.log("Preview: playing new song from start:", mp3File);
           lastPreviewSongIndex = selectedSongIndex;
           isPreviewPlaying = true;
+          setPreviewArrow(selectedSongIndex, true);
         })
         .catch(err => console.error("Preview play error:", err));
 
