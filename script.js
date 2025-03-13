@@ -132,8 +132,17 @@ function setPreviewArrow(index, isOn) {
     audioPlayer.play()
       .then(() => {
         startNotesForSong(songs[selectedSongIndex]);
-        scrollToBottom();
         console.log(`Playing: ${mp3File}`);
+        scrollToBottom();
+
+        // (Новый шаг) Установить название в #grayFooterTitle
+      const rawTitle = songs[selectedSongIndex].title;
+      let displayedTitle = rawTitle;
+      if (rawTitle.length > 20) {
+        displayedTitle = rawTitle.substring(0, 17) +"..."; // первые 20 символов
+      }
+      document.getElementById("grayFooterTitle").textContent = displayedTitle;
+
       })
       .catch(err => {
         console.error("Audio play error:", err);
@@ -255,11 +264,9 @@ function setPreviewArrow(index, isOn) {
     }
   });
 
-
   function updateSongListHeight() {
     const previewBlock = document.getElementById("previewBlock");
     const songList = document.getElementById("songListContainer");
-    const songAndPreview = document.getElementById("songAndPreview");
   
     // (A) Высота «правого блока» (Preview + чекбоксы + Tempo)
     const previewRect = previewBlock.getBoundingClientRect();
@@ -278,7 +285,6 @@ function setPreviewArrow(index, isOn) {
     songList.style.height = desiredHeight + "px";
     songAndPreview.style.height = desiredHeight + "px";
   }
-  
 
   function scrollToBottom() {
     // Способ A: «плавная» прокрутка (поддерживается современными браузерами)
@@ -290,9 +296,27 @@ function setPreviewArrow(index, isOn) {
     // Или способ B (старый) - мгновенно:
     // window.scrollTo(0, document.body.scrollHeight);
   }
-
+  
+  
 
 });
+
+function updateTimer() {
+  // Предположим, у вас есть <audio id="audioPlayer">:
+  const audio = document.getElementById("audioPlayer");
+  
+  // Получаем текущее время в секундах (число с плавающей запятой)
+  const currentTimeSec = audio.currentTime;
+  
+  // Форматируем с одним знаком после запятой
+  const timeStr = currentTimeSec.toFixed(1) + "s";
+  
+  // Вставляем в элемент на странице
+  document.getElementById("grayFooterTimer").textContent = timeStr;
+}
+
+
+
 
 // ---- Ниже -- функции для нот:
 
@@ -308,6 +332,7 @@ function stopNotes() {
   const canvas = document.getElementById("notesCanvas");
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  document.getElementById("grayFooterTitle").textContent = "";
 }
 
 function drawNotesFrame() {
@@ -349,7 +374,7 @@ function drawNotesFrame() {
       });
     }
   });
+  updateTimer();
 
   requestAnimationFrame(drawNotesFrame);
 }
-

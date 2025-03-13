@@ -32,11 +32,44 @@ button {
   background: black;
   width: 90vw;         /* адаптивная ширина ~90% экрана */
   max-width: 400px;    /* не больше 400px */
-  height: 90vh;        
+  height: 70vh;        
   max-height: 700px;
-  margin: 20px auto;   /* отступ сверху 20px, выравнивание по центру */
+  margin: 20px auto 0 auto;   /* отступ сверху 20px, выравнивание по центру */
 }
 
+#grayFooter {
+  background-color: #575757;   /* Серый цвет, по вкусу (#aaa, #bbb и т. д.) */
+  
+  /* Ширина, как у canvas: 90vw, max-width 400px */
+  width: 90vw;
+  max-width: 400px;
+  position: relative; /* чтобы ребенок мог позиционироваться */
+  /* Высота = 10vh */
+  height: 5vh;
+
+  /* Чтобы центрировать по горизонтали, как canvas */
+  margin: 0 auto; 
+  margin-bottom: 20px;
+  
+}
+
+#grayFooterTitle {
+  padding-top: 0.5rem; /* небольшой отступ сверху, если нужно */
+  font-weight: bold;  /* жирный текст, по вкусу */
+  text-align: center; /* на случай, если display:flex не задан */
+  max-width: 100%;
+  overflow: hidden;
+  color: white;  
+  /* если хотите «обрезать», можно добавить white-space:nowrap; text-overflow:ellipsis; */
+}
+
+#grayFooterTimer {
+  position: absolute;       /* теперь можем ставить top / left относительно #grayFooter */
+  top: 0.5rem;             /* немного отступа сверху */
+  left: 0.5rem;            /* чуть сдвинуть слева */
+  font-size: 0.9rem;       /* по вкусу */
+  color: white;             /* цвет текста потемнее / посветлее */
+}
 
 
 #songAndPreview {
