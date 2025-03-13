@@ -67,7 +67,7 @@ songs.forEach((songObj, index) => {
 function setPreviewArrow(index, isOn) {
   if (index < 0) return; // на случай если -1
   if (isOn) {
-    songDivs[index].textContent = "=> " + songs[index].title;
+    songDivs[index].textContent = "▶ " + songs[index].title;
   } else {
     songDivs[index].textContent = songs[index].title;
   }
@@ -132,6 +132,7 @@ function setPreviewArrow(index, isOn) {
     audioPlayer.play()
       .then(() => {
         startNotesForSong(songs[selectedSongIndex]);
+        scrollToBottom();
         console.log(`Playing: ${mp3File}`);
       })
       .catch(err => {
@@ -247,12 +248,18 @@ function setPreviewArrow(index, isOn) {
 
   // 2) Добавим обработчик на "resize" (и "orientationchange"), 
   //    чтобы при повороте экрана пересчитать:
-  window.addEventListener("resize", updateSongListHeight);
+  window.addEventListener("resize", () => {
+    updateSongListHeight(); 
+    if (isPlayingNotes) {
+      scrollToBottom();
+    }
+  });
 
 
   function updateSongListHeight() {
     const previewBlock = document.getElementById("previewBlock");
     const songList = document.getElementById("songListContainer");
+    const songAndPreview = document.getElementById("songAndPreview");
   
     // (A) Высота «правого блока» (Preview + чекбоксы + Tempo)
     const previewRect = previewBlock.getBoundingClientRect();
@@ -272,6 +279,19 @@ function setPreviewArrow(index, isOn) {
     songAndPreview.style.height = desiredHeight + "px";
   }
   
+
+  function scrollToBottom() {
+    // Способ A: «плавная» прокрутка (поддерживается современными браузерами)
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth"
+    });
+  
+    // Или способ B (старый) - мгновенно:
+    // window.scrollTo(0, document.body.scrollHeight);
+  }
+
+
 });
 
 // ---- Ниже -- функции для нот:
