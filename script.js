@@ -124,6 +124,24 @@ function setPreviewArrow(index, isOn) {
   const btnPreview = document.getElementById("btnPreview");
 
 
+   // ----- Новая функция: отправка "time <value>"
+   function sendTimeCmd(newTime) {
+    // Формируем строку с точностью 4 знака: "time 18.5555"
+    const timeValue = newTime.toFixed(4); // 4 знака
+    const cmdString = `time ${timeValue}`;
+    console.log("Will send:", cmdString);
+
+    // Выполняем fetch(...)
+    const url = `${baseUrl}/do?cmd=${encodeURIComponent(cmdString)}`;
+    fetch(url)
+      .then(resp => resp.text())
+      .then(data => {
+        console.log("Server said (time cmd):", data);
+      })
+      .catch(err => {
+        console.error("time cmd fetch error:", err);
+      });
+  }
   
 
   // При нажатии Play отправляем команду + меняем audio.src
@@ -417,11 +435,10 @@ function setPreviewArrow(index, isOn) {
   // Вешаем обработчик «перемотать назад 5 секунд»
 btnSkipBack.addEventListener("click", () => {
   //if (!isPlayingNotes) return;
-  const ended = audioPlayer.ended;
   const t = audioPlayer.currentTime;
   const newT = Math.max(t - 5, 0);
   audioPlayer.currentTime = newT;
-  
+  sendTimeCmd(newT);
   
 });
 
@@ -431,7 +448,9 @@ btnSkipForward.addEventListener("click", () => {
   // Например, не даём выходить за границы длины трека (optionally)
   const duration = audioPlayer.duration || 0;
   const t = audioPlayer.currentTime;
-  audioPlayer.currentTime = Math.min(t + 5, duration);
+  const newT = Math.min(t + 5, duration);
+  audioPlayer.currentTime = newT;
+  sendTimeCmd(newT);
 });
 
 
