@@ -7,12 +7,15 @@ import { loadAllSongData } from './songdata_all.js';
   let lastPreviewSongIndex = -1; 
   let isPreviewPlaying = false;  // идёт ли сейчас preview
   let isSongPaused = false; 
-  
+
 
 document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("grayFooterTitle").textContent = "-";
   document.getElementById("grayFooterTimer").textContent = "0.0s";
+  // Базовый URL: http://localhost:3000
+  // (Если потом на ESP, замените на http://192.168.4.1)
+  const baseUrl = "https://saolla.ru/app"; //https://saolla.ru/app  http://localhost:3000 http://192.168.4.1
 
   // 1) Загружаем все файлы .js (songdata_1,2,3...) динамически:
   const allData = await loadAllSongData(); 
@@ -42,6 +45,35 @@ const btnSkipForward = document.getElementById("btnSkipForward");
 
   //делаем прокручиваемый список с кликабельными элементами
 
+
+  // --- Вспомогательная функция для отправки "stat"
+  function sendStat() {
+    // songIndex нумеруем с 1 (если нужно так),
+    // или используем selectedSongIndex напрямую. Предположим, +1:
+    const songNum = selectedSongIndex + 1;
+
+    // Превращаем currentTempo в проценты (1.0 -> 100, 0.75 -> 75, ...)
+    const tempoPercent = Math.round(currentTempo * 100);
+
+    // Формируем строку: "stat songNum tempoPercent 0"
+    // Пример: "stat 3 100 0"
+    const statCmd = `stat ${songNum} ${tempoPercent} 0`;
+
+    // Отправляем по http: /do?cmd=stat 3 100 0
+    // baseUrl возьмём из глобалей:
+    const url = `${baseUrl}/do?cmd=${encodeURIComponent(statCmd)}`;
+
+    fetch(url)
+      .then(resp => resp.text())
+      .then(data => {
+        console.log("Server said:", data);
+      })
+      .catch(err => {
+        console.error("sendStat fetch error:", err);
+      });
+  }
+
+
 const songDivs = [];
 songs.forEach((songObj, index) => {
   const itemDiv = document.createElement("div");
@@ -62,9 +94,11 @@ songs.forEach((songObj, index) => {
     // Уберём выделение со всех
     [...songListContainer.children].forEach(child => {
       child.style.backgroundColor = "";
+
     });
     // Выделим текущую
     itemDiv.style.backgroundColor = "#ddd";
+    sendStat();
   });
 
   songListContainer.appendChild(itemDiv);
@@ -90,9 +124,7 @@ function setPreviewArrow(index, isOn) {
   const btnPreview = document.getElementById("btnPreview");
 
 
-  // Базовый URL: http://localhost:3000
-  // (Если потом на ESP, замените на http://192.168.4.1)
-  const baseUrl = "https://saolla.ru/app"; //https://saolla.ru/app  http://localhost:3000 http://192.168.4.1
+  
 
   // При нажатии Play отправляем команду + меняем audio.src
   btnPlay.addEventListener("click", () => {
@@ -259,6 +291,7 @@ function setPreviewArrow(index, isOn) {
     if (!isPreviewPlaying) {
       audioPlayer.playbackRate = newTempo;
     }
+    sendStat();
   });
 
   updateSongListHeight();
@@ -482,6 +515,13 @@ btnSkipForward.addEventListener("click", () => {
     btnPauseResume.textContent = "▷";
   });
   
+  setInterval(() => {
+    // а потом сразу sendStat(), который, если успешен, покрасит в зелёный:
+    sendStat();
+  }, 5000);
+
+
+  sendStat();
   
 });
 
