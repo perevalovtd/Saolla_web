@@ -44,8 +44,6 @@ button {
   width: 90vw;
   max-width: 400px;
   position: relative; /* чтобы ребенок мог позиционироваться */
-  /* Высота = 10vh */
-  height: 5vh;
 
   /* Чтобы центрировать по горизонтали, как canvas */
   margin: 0 auto; 
@@ -69,6 +67,32 @@ button {
   left: 0.5rem;            /* чуть сдвинуть слева */
   font-size: 0.9rem;       /* по вкусу */
   color: white;             /* цвет текста потемнее / посветлее */
+}
+
+#grayFooterPauseWrapper {
+  display: flex;            /* Позволяем размещать дочерние кнопки в ряд */
+  justify-content: center;  /* Центрируем по горизонтали */
+  align-items: center;      /* По вертикали тоже по центру */
+  gap: 0;                   /* Если надо вплотную (можно 0 или 2px) */
+  margin-top: 0.3rem;       /* Немного отступа сверху, если хотите */
+}
+
+#grayFooterPauseWrapper button {
+  font-size: 1.4rem;   /* Иконки покрупнее */
+  cursor: pointer;
+  background: none;    /* Можно убрать фон */
+  border: none;        /* Убрать стандартную рамку */
+  color: white; 
+  /* Можно добавить :hover эффекты, например
+     background: rgba(255,255,255,0.1); border-radius:4px; и т.д. */
+}
+
+#btnPauseResume {
+  font-size: 1.4rem;  /* размер иконки (по вкусу) */
+  cursor: pointer;    
+  background: none;   /* стили на ваше усмотрение */
+  border: none;
+  color: white; 
 }
 
 

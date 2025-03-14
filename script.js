@@ -6,9 +6,13 @@ import { loadAllSongData } from './songdata_all.js';
   let currentTempo = 1.0; // по умолчанию 100%
   let lastPreviewSongIndex = -1; 
   let isPreviewPlaying = false;  // идёт ли сейчас preview
+  let isSongPaused = false; 
   
 
 document.addEventListener("DOMContentLoaded", async () => {
+
+  document.getElementById("grayFooterTitle").textContent = "-";
+  document.getElementById("grayFooterTimer").textContent = "0.0s";
 
   // 1) Загружаем все файлы .js (songdata_1,2,3...) динамически:
   const allData = await loadAllSongData(); 
@@ -31,6 +35,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 // 3) Остальное — как у вас
 const songListContainer = document.getElementById("songListContainer");
 let selectedSongIndex = 0;
+
+const btnPauseResume = document.getElementById("btnPauseResume");
+const btnSkipBack = document.getElementById("btnSkipBack");
+const btnSkipForward = document.getElementById("btnSkipForward");
 
   //делаем прокручиваемый список с кликабельными элементами
 
@@ -158,7 +166,7 @@ function setPreviewArrow(index, isOn) {
           console.log("Server said:", data);
         })
         .catch(err => console.error("Fetch error:", err));
-
+      
       audioPlayer.pause();
       audioPlayer.currentTime = 0;
       stopNotes();
@@ -254,11 +262,13 @@ function setPreviewArrow(index, isOn) {
   });
 
   updateSongListHeight();
+  updateGrayFooterHeight();
 
   // 2) Добавим обработчик на "resize" (и "orientationchange"), 
   //    чтобы при повороте экрана пересчитать:
   window.addEventListener("resize", () => {
     updateSongListHeight(); 
+    updateGrayFooterHeight();
     if (isPlayingNotes) {
       scrollToBottom();
     }
@@ -286,6 +296,31 @@ function setPreviewArrow(index, isOn) {
     songAndPreview.style.height = desiredHeight + "px";
   }
 
+  function updateGrayFooterHeight() {
+    const grayFooter = document.getElementById("grayFooter");
+    const titleElem = document.getElementById("grayFooterTitle");
+    const pauseWrapper = document.getElementById("grayFooterPauseWrapper");
+  
+    // 1) Берём прямоугольники
+    const rectTitle = titleElem.getBoundingClientRect();
+    const rectPause = pauseWrapper.getBoundingClientRect();
+  
+    // 2) Вычисляем разницу
+    //    Но обратите внимание, getBoundingClientRect() 
+    //    возвращает координаты относительно окна (viewport).
+    //    Мы предполагаем, что grayFooter тоже в потоке, 
+    //    так что их top/bottom сопоставимы. 
+    //    Иначе можно сначала определить offsetTop/offsetHeight и т.п.
+    const neededHeight = (rectPause.bottom - rectTitle.top);
+  
+    // Можем добавить небольшой запас / padding, например + 10px
+    const finalHeight = neededHeight + 10;  // на ваш вкус
+  
+    // 3) Присваиваем
+    grayFooter.style.height = finalHeight + "px";
+    console.log("Gray footer new height:", finalHeight);
+  }
+
   function scrollToBottom() {
     // Способ A: «плавная» прокрутка (поддерживается современными браузерами)
     window.scrollTo({
@@ -297,84 +332,141 @@ function setPreviewArrow(index, isOn) {
     // window.scrollTo(0, document.body.scrollHeight);
   }
   
-  
+   // Обработчик клика по кнопке «пауза/возобновить»
+  btnPauseResume.addEventListener("click", () => {
+    if (!isPlayingNotes) {
+      // Если сейчас вообще не идёт воспроизведение (isPlayingNotes = false),
+      // то кнопку можно либо игнорировать, либо «молча» ничего не делать.
+      console.log("No active song - ignoring pause/resume");
+      return;
+    }
 
-});
-
-function updateTimer() {
-  // Предположим, у вас есть <audio id="audioPlayer">:
-  const audio = document.getElementById("audioPlayer");
-  
-  // Получаем текущее время в секундах (число с плавающей запятой)
-  const currentTimeSec = audio.currentTime;
-  
-  // Форматируем с одним знаком после запятой
-  const timeStr = currentTimeSec.toFixed(1) + "s";
-  
-  // Вставляем в элемент на странице
-  document.getElementById("grayFooterTimer").textContent = timeStr;
-}
-
-
-
-
-// ---- Ниже -- функции для нот:
-
-function startNotesForSong(songObj) {
-  currentSongData = songObj;
-  isPlayingNotes = true;
-  requestAnimationFrame(drawNotesFrame);
-}
-
-function stopNotes() {
-  isPlayingNotes = false;
-  currentSongData = null;
-  const canvas = document.getElementById("notesCanvas");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  document.getElementById("grayFooterTitle").textContent = "";
-}
-
-function drawNotesFrame() {
-  if (!isPlayingNotes || !currentSongData) return;
-
-  const canvas = document.getElementById("notesCanvas");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const audio = document.getElementById("audioPlayer");
-  const currentTimeSec = audio.currentTime;
-
-  const { noteMin, noteMax, zNotes } = currentSongData;
-  const range = noteMax - noteMin;
-
-  const windowSec = 5;
-  zNotes.forEach(z => {
-    const dt = z.time - currentTimeSec;
-    if (dt > 0 && dt < windowSec) {
-      const frac = 1 - (dt / windowSec);
-      const size_y=4;
-      const margin_y = size_y*0.5;
-      const drawableHeight = canvas.height - (margin_y * 2);
-      const y = margin_y+(frac * drawableHeight);
-      z.notes.forEach(notePitch => {
-        const pitchFrac = (notePitch - noteMin) / range;
-        // Допустим, хотим слева и справа отступ по 5 пикселей,
-        // чтобы целиком влезал прямоугольник 10x10.
-        const size_x = 10;
-        const margin = size_x*0.5;
-        const drawableWidth = canvas.width - (margin * 2);
-        // pitchFrac от 0 до 1.
-        // Чтобы крайняя нота (pitchFrac=0) рисовалась на x=margin,
-        // а (pitchFrac=1) рисовалась на x=(margin + drawableWidth)
-        const x = margin + (pitchFrac * drawableWidth);
-        //const y = margin + (pitchFrac * drawableHeight);
-        ctx.fillStyle = "white";
-        ctx.fillRect(x - (size_x*0.5), y -(size_y*0.5), size_x, size_y+0.25);
-      });
+    if (!isSongPaused) {
+      // Текущая песня играет — ставим на паузу
+      audioPlayer.pause();
+      btnPauseResume.textContent = "▷"; // показываем "Play" иконку
+      isSongPaused = true;
+    } else {
+      // Песня на паузе — возобновляем воспроизведение
+      audioPlayer.play();
+      btnPauseResume.textContent = "| |"; // возвращаем "Pause"
+      isSongPaused = false;
     }
   });
-  updateTimer();
 
-  requestAnimationFrame(drawNotesFrame);
-}
+  // Вешаем обработчик «перемотать назад 5 секунд»
+btnSkipBack.addEventListener("click", () => {
+  //if (!isPlayingNotes) return;
+  const ended = audioPlayer.ended;
+  const t = audioPlayer.currentTime;
+  const newT = Math.max(t - 5, 0);
+  audioPlayer.currentTime = newT;
+  
+  
+});
+
+// Вешаем обработчик «перемотать вперёд 5 секунд»
+btnSkipForward.addEventListener("click", () => {
+  if (!isPlayingNotes) return;
+  // Например, не даём выходить за границы длины трека (optionally)
+  const duration = audioPlayer.duration || 0;
+  const t = audioPlayer.currentTime;
+  audioPlayer.currentTime = Math.min(t + 5, duration);
+});
+
+
+  function updateTimer() {
+    // Предположим, у вас есть <audio id="audioPlayer">:
+    const audio = document.getElementById("audioPlayer");
+    
+    // Получаем текущее время в секундах (число с плавающей запятой)
+    const currentTimeSec = audio.currentTime;
+    
+    // Форматируем с одним знаком после запятой
+    const timeStr = currentTimeSec.toFixed(1) + "s";
+    
+    // Вставляем в элемент на странице
+    document.getElementById("grayFooterTimer").textContent = timeStr;
+  }
+
+  function startNotesForSong(songObj) {
+    currentSongData = songObj;
+    isPlayingNotes = true;
+    isSongPaused = false;   
+    btnPauseResume.textContent = "| |"; 
+    requestAnimationFrame(drawNotesFrame);
+  }
+
+  
+  function stopNotes() {
+    isPlayingNotes = false;
+    currentSongData = null;
+    const canvas = document.getElementById("notesCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    isSongPaused = false;
+    btnPauseResume.textContent = "| |";
+    document.getElementById("grayFooterTimer").textContent = "0.0s";
+    document.getElementById("grayFooterTitle").textContent = "-";
+    
+  }
+
+
+  function drawNotesFrame() {
+    if (!isPlayingNotes || !currentSongData) return;
+  
+    const canvas = document.getElementById("notesCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+    const audio = document.getElementById("audioPlayer");
+    const currentTimeSec = audio.currentTime;
+  
+    const { noteMin, noteMax, zNotes } = currentSongData;
+    const range = noteMax - noteMin;
+  
+    const windowSec = 5;
+    zNotes.forEach(z => {
+      const dt = z.time - currentTimeSec;
+      if (dt > 0 && dt < windowSec) {
+        const frac = 1 - (dt / windowSec);
+        const size_y=4;
+        const margin_y = size_y*0.5;
+        const drawableHeight = canvas.height - (margin_y * 2);
+        const y = margin_y+(frac * drawableHeight);
+        z.notes.forEach(notePitch => {
+          const pitchFrac = (notePitch - noteMin) / range;
+          // Допустим, хотим слева и справа отступ по 5 пикселей,
+          // чтобы целиком влезал прямоугольник 10x10.
+          const size_x = 10;
+          const margin = size_x*0.5;
+          const drawableWidth = canvas.width - (margin * 2);
+          // pitchFrac от 0 до 1.
+          // Чтобы крайняя нота (pitchFrac=0) рисовалась на x=margin,
+          // а (pitchFrac=1) рисовалась на x=(margin + drawableWidth)
+          const x = margin + (pitchFrac * drawableWidth);
+          //const y = margin + (pitchFrac * drawableHeight);
+          ctx.fillStyle = "white";
+          ctx.fillRect(x - (size_x*0.5), y -(size_y*0.5), size_x, size_y+0.25);
+        });
+      }
+    });
+    updateTimer();
+  
+    requestAnimationFrame(drawNotesFrame);
+  }
+
+
+  audioPlayer.addEventListener("ended", () => {
+    console.log("audio ended - do nothing about isSongPaused");
+    // при желании можем вызвать stopNotes(), но без выставления isSongPaused = true
+    // или вообще не останавливать ноты, 
+    // если хотим, чтобы при "отмотке" ноты продолжились
+    isSongPaused = true;
+    btnPauseResume.textContent = "▷";
+  });
+  
+  
+});
+
+
