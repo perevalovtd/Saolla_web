@@ -340,6 +340,22 @@ function setPreviewArrow(index, isOn) {
       console.log("No active song - ignoring pause/resume");
       return;
     }
+    
+    if (audioPlayer.ended && isSongPaused) {
+      console.log("Track ended, user presses pause/resume => send 'play' to server");
+  
+      const startGuitarCheckbox = document.getElementById("startGuitarCheckbox");
+      if (startGuitarCheckbox.checked) {
+        // Отправим "play" на сервер
+        fetch(`${baseUrl}/do?cmd=play`)
+          .then(resp => resp.text())
+          .then(data => {
+            console.log("Server said:", data);
+          })
+          .catch(err => console.error("Fetch error:", err));
+      }
+  
+    }
 
     if (!isSongPaused) {
       // Текущая песня играет — ставим на паузу
