@@ -394,11 +394,22 @@ function setPreviewArrow(index, isOn) {
       // Текущая песня играет — ставим на паузу
       audioPlayer.pause();
       btnPauseResume.textContent = "▷"; // показываем "Play" иконку
+      fetch(`${baseUrl}/do?cmd=${encodeURIComponent("pause")}`)
+        .then(resp => resp.text())
+        .then(data => console.log("Server said:", data))
+        .catch(err => console.error("Fetch error:", err));
+
       isSongPaused = true;
+
     } else {
       // Песня на паузе — возобновляем воспроизведение
       audioPlayer.play();
       btnPauseResume.textContent = "| |"; // возвращаем "Pause"
+      fetch(`${baseUrl}/do?cmd=${encodeURIComponent("continue")}`)
+        .then(resp => resp.text())
+        .then(data => console.log("Server said:", data))
+        .catch(err => console.error("Fetch error:", err));
+
       isSongPaused = false;
     }
   });
